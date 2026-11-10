@@ -65,8 +65,43 @@ class Cart:
         
     def item_total(self):
         return sum([line.subtotal() for line in self.lines])
+
+    def discount(self): # 할인 (쿠폰 종류는 묻지 않음)
+        return self.coupon.discount_amount(self.item_total())
+
+    def shipping_fee(self): # 배송비
+        if len(self.lines) == 0:
+            return 0
+        if self.item_total() - self.discount() >= 30000:
+            return 0
+        return 3000
+
+    def pay_amount(self): # 결제 금액
+        return self.item_total() - self.discount() + self.shipping_fee()
+
+    def show(self):
+        print("-" * 40)
+        for line in self.lines:
+            print(f"{line.item.name}\tx {line.qty}\t{line.subtotal():>10,}원")
+        print("-" * 40)
+        print(f"상품 합계\t\t{self.item_total():>10,}원")
+        print(f"할인\t\t\t{-self.discount():>10,}원  [{self.coupon.name}]")
+        print(f"배송비\t\t\t{self.shipping_fee():>10,}원")
+        print(f"결제 금액\t\t{self.pay_amount():>10,}원")
+        print("-" * 40)
+
+    def checkout(self):
+        if len(self.lines) == 0:
+            print("장바구니가 비어 있습니다.")
+            return
+        print("[영수증]")
+        self.show()
+        for line in self.lines:
+            line.item.decrease_stock(line.qty) # 재고는 결제할 때만 줄어든다
+        self.lines = [] # 장바구니 비우기
+        self.coupon = Discount() # 쿠폰 초기화
+        print("결제가 완료되었습니다. 감사합니다!")
     
-# 할인 요구사항 먼저 확인하고 학습할 것
     
 class Discount: # 부모: 쿠폰 없음
     name = "쿠폰 없음" # 클래스 변수
