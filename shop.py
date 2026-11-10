@@ -65,3 +65,33 @@ class Cart:
         
     def item_total(self):
         return sum([line.subtotal() for line in self.lines])
+    
+# 할인 요구사항 먼저 확인하고 학습할 것
+    
+class Discount: # 부모: 쿠폰 없음
+    name = "쿠폰 없음" # 클래스 변수
+    
+    def discount_amount(self, total):
+        return 0
+    
+class RateDiscount(Discount): # 상속
+    def __init__(self, rate, max_amount):
+        # super().__init__()
+        self.rate = rate
+        self.max_amount = max_amount
+        self.name = f"{int(rate * 100)}% 할인 (최대 {max_amount:,}원)"
+    
+    def discount_amount(self, total): # 오버라이딩
+        amount = int(total * self.rate) # 원 단위 미만 버림
+        return min(amount, self.max_amount)
+    
+class FixedDiscount(Discount): # 상속
+    def __init__(self, amount, min_total):
+        self.amount = amount
+        self.min_total = min_total
+        self.name = f"{amount:,}원 할인 ({min_total:,}원 이상 구매 시)"
+
+    def discount_amount(self, total): # 오버라이딩
+        if total >= self.min_total:
+            return self.amount
+        return 0
